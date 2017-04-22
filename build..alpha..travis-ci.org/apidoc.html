@@ -1,0 +1,483 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/jscs-dev/gulp-jscs#readme"
+
+    >gulp-jscs (v4.0.0)</a>
+</h1>
+<h4>Check JavaScript code style with jscs</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.gulp-jscs">module gulp-jscs</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jscs.gulp-jscs">
+            function <span class="apidocSignatureSpan"></span>gulp-jscs
+            <span class="apidocSignatureSpan">(opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jscs.index">
+            function <span class="apidocSignatureSpan">gulp-jscs.</span>index
+            <span class="apidocSignatureSpan">(opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jscs.reporter">
+            function <span class="apidocSignatureSpan">gulp-jscs.</span>reporter
+            <span class="apidocSignatureSpan">(reporter)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.gulp-jscs.index">module gulp-jscs.index</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jscs.index.index">
+            function <span class="apidocSignatureSpan">gulp-jscs.</span>index
+            <span class="apidocSignatureSpan">(opts)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.gulp-jscs.index.reporter">
+            function <span class="apidocSignatureSpan">gulp-jscs.index.</span>reporter
+            <span class="apidocSignatureSpan">(reporter)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.gulp-jscs" id="apidoc.module.gulp-jscs">module gulp-jscs</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-jscs.gulp-jscs" id="apidoc.element.gulp-jscs.gulp-jscs">
+        function <span class="apidocSignatureSpan"></span>gulp-jscs
+        <span class="apidocSignatureSpan">(opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">gulp-jscs = function (opts) {
+	opts = opts || {};
+
+	var config;
+	var checker = new Checker();
+
+	try {
+		config = loadConfigFile.load(opts.configPath);
+	} catch (err) {
+		err.message = &#x27;Unable to load JSCS config file&#x27;;
+
+		if (opts.configPath) {
+			err.message += &#x27; at &#x27; + tildify(path.resolve(opts.configPath));
+		}
+
+		err.message += &#x27;\n&#x27; + err.message;
+
+		throw err;
+	}
+
+	// run autofix over as many errors as possible
+	if (opts.fix) {
+		config.maxErrors = Infinity;
+	}
+
+	checker.registerDefaultRules();
+	checker.configure(config);
+
+	return through.obj(function (file, enc, cb) {
+		if (file.isNull()) {
+			cb(null, file);
+			return;
+		}
+
+		if (file.isStream()) {
+			cb(new gutil.PluginError(&#x27;gulp-jscs&#x27;, &#x27;Streaming not supported&#x27;));
+			return;
+		}
+
+		if (checker.getConfiguration().isFileExcluded(file.path)) {
+			cb(null, file);
+			return;
+		}
+
+		var fixResults;
+		var errors;
+		var contents = file.contents.toString();
+
+		if (opts.fix) {
+			fixResults = checker.fixString(contents, file.path);
+			errors = fixResults.errors;
+			file.contents = new Buffer(fixResults.output);
+		} else {
+			errors = checker.checkString(contents, file.path);
+		}
+
+		var errorList = errors.getErrorList();
+
+		file.jscs = {
+			success: true,
+			errorCount: 0,
+			errors: []
+		};
+
+		if (errorList.length &#x3e; 0) {
+			file.jscs.success = false;
+			file.jscs.errorCount = errorList.length;
+			file.jscs.errors = errors;
+		}
+
+		cb(null, file);
+	});
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-jscs.index" id="apidoc.element.gulp-jscs.index">
+        function <span class="apidocSignatureSpan">gulp-jscs.</span>index
+        <span class="apidocSignatureSpan">(opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">index = function (opts) {
+	opts = opts || {};
+
+	var config;
+	var checker = new Checker();
+
+	try {
+		config = loadConfigFile.load(opts.configPath);
+	} catch (err) {
+		err.message = &#x27;Unable to load JSCS config file&#x27;;
+
+		if (opts.configPath) {
+			err.message += &#x27; at &#x27; + tildify(path.resolve(opts.configPath));
+		}
+
+		err.message += &#x27;\n&#x27; + err.message;
+
+		throw err;
+	}
+
+	// run autofix over as many errors as possible
+	if (opts.fix) {
+		config.maxErrors = Infinity;
+	}
+
+	checker.registerDefaultRules();
+	checker.configure(config);
+
+	return through.obj(function (file, enc, cb) {
+		if (file.isNull()) {
+			cb(null, file);
+			return;
+		}
+
+		if (file.isStream()) {
+			cb(new gutil.PluginError(&#x27;gulp-jscs&#x27;, &#x27;Streaming not supported&#x27;));
+			return;
+		}
+
+		if (checker.getConfiguration().isFileExcluded(file.path)) {
+			cb(null, file);
+			return;
+		}
+
+		var fixResults;
+		var errors;
+		var contents = file.contents.toString();
+
+		if (opts.fix) {
+			fixResults = checker.fixString(contents, file.path);
+			errors = fixResults.errors;
+			file.contents = new Buffer(fixResults.output);
+		} else {
+			errors = checker.checkString(contents, file.path);
+		}
+
+		var errorList = errors.getErrorList();
+
+		file.jscs = {
+			success: true,
+			errorCount: 0,
+			errors: []
+		};
+
+		if (errorList.length &#x3e; 0) {
+			file.jscs.success = false;
+			file.jscs.errorCount = errorList.length;
+			file.jscs.errors = errors;
+		}
+
+		cb(null, file);
+	});
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-jscs.reporter" id="apidoc.element.gulp-jscs.reporter">
+        function <span class="apidocSignatureSpan">gulp-jscs.</span>reporter
+        <span class="apidocSignatureSpan">(reporter)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">reporter = function (reporter) {
+	if (reporter === &#x27;fail&#x27; || reporter === &#x27;failImmediately&#x27;) {
+		return failReporter(reporter === &#x27;failImmediately&#x27;);
+	}
+
+	var rpt = loadReporter(reporter);
+
+	if (typeof rpt !== &#x27;function&#x27;) {
+		throw new PluginError(&#x27;gulp-jscs&#x27;, &#x27;Invalid reporter&#x27;);
+	}
+
+	// return stream that reports stuff
+	return through.obj(function (file, enc, cb) {
+		if (file.jscs &#x26;&#x26; !file.jscs.success) {
+			rpt([file.jscs.errors]);
+		}
+
+		cb(null, file);
+	});
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+```js
+const gulp = require(&#x27;gulp&#x27;);
+const jscs = require(&#x27;gulp-jscs&#x27;);
+
+gulp.task(&#x27;default&#x27;, () =&#x3e; {
+	return gulp.src(&#x27;src/app.js&#x27;)
+		.pipe(jscs())
+		.pipe(jscs.<span class="apidocCodeKeywordSpan">reporter</span>());
+});
+```
+
+### Fixing
+
+```js
+const gulp = require(&#x27;gulp&#x27;);
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.gulp-jscs.index" id="apidoc.module.gulp-jscs.index">module gulp-jscs.index</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-jscs.index.index" id="apidoc.element.gulp-jscs.index.index">
+        function <span class="apidocSignatureSpan">gulp-jscs.</span>index
+        <span class="apidocSignatureSpan">(opts)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">index = function (opts) {
+	opts = opts || {};
+
+	var config;
+	var checker = new Checker();
+
+	try {
+		config = loadConfigFile.load(opts.configPath);
+	} catch (err) {
+		err.message = &#x27;Unable to load JSCS config file&#x27;;
+
+		if (opts.configPath) {
+			err.message += &#x27; at &#x27; + tildify(path.resolve(opts.configPath));
+		}
+
+		err.message += &#x27;\n&#x27; + err.message;
+
+		throw err;
+	}
+
+	// run autofix over as many errors as possible
+	if (opts.fix) {
+		config.maxErrors = Infinity;
+	}
+
+	checker.registerDefaultRules();
+	checker.configure(config);
+
+	return through.obj(function (file, enc, cb) {
+		if (file.isNull()) {
+			cb(null, file);
+			return;
+		}
+
+		if (file.isStream()) {
+			cb(new gutil.PluginError(&#x27;gulp-jscs&#x27;, &#x27;Streaming not supported&#x27;));
+			return;
+		}
+
+		if (checker.getConfiguration().isFileExcluded(file.path)) {
+			cb(null, file);
+			return;
+		}
+
+		var fixResults;
+		var errors;
+		var contents = file.contents.toString();
+
+		if (opts.fix) {
+			fixResults = checker.fixString(contents, file.path);
+			errors = fixResults.errors;
+			file.contents = new Buffer(fixResults.output);
+		} else {
+			errors = checker.checkString(contents, file.path);
+		}
+
+		var errorList = errors.getErrorList();
+
+		file.jscs = {
+			success: true,
+			errorCount: 0,
+			errors: []
+		};
+
+		if (errorList.length &#x3e; 0) {
+			file.jscs.success = false;
+			file.jscs.errorCount = errorList.length;
+			file.jscs.errors = errors;
+		}
+
+		cb(null, file);
+	});
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.gulp-jscs.index.reporter" id="apidoc.element.gulp-jscs.index.reporter">
+        function <span class="apidocSignatureSpan">gulp-jscs.index.</span>reporter
+        <span class="apidocSignatureSpan">(reporter)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">reporter = function (reporter) {
+	if (reporter === &#x27;fail&#x27; || reporter === &#x27;failImmediately&#x27;) {
+		return failReporter(reporter === &#x27;failImmediately&#x27;);
+	}
+
+	var rpt = loadReporter(reporter);
+
+	if (typeof rpt !== &#x27;function&#x27;) {
+		throw new PluginError(&#x27;gulp-jscs&#x27;, &#x27;Invalid reporter&#x27;);
+	}
+
+	// return stream that reports stuff
+	return through.obj(function (file, enc, cb) {
+		if (file.jscs &#x26;&#x26; !file.jscs.success) {
+			rpt([file.jscs.errors]);
+		}
+
+		cb(null, file);
+	});
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+```js
+const gulp = require(&#x27;gulp&#x27;);
+const jscs = require(&#x27;gulp-jscs&#x27;);
+
+gulp.task(&#x27;default&#x27;, () =&#x3e; {
+	return gulp.src(&#x27;src/app.js&#x27;)
+		.pipe(jscs())
+		.pipe(jscs.<span class="apidocCodeKeywordSpan">reporter</span>());
+});
+```
+
+### Fixing
+
+```js
+const gulp = require(&#x27;gulp&#x27;);
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
